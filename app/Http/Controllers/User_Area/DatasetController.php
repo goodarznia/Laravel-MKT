@@ -26,6 +26,7 @@ class DatasetController extends Controller
     {
         return view('dataset.import');
     }
+    //This function use for Store data from import form list
     public function store(DatasetExplanationRequest $request)
     {
 
@@ -63,5 +64,12 @@ class DatasetController extends Controller
 
         alert()->success('The dataset stored in Database properly', 'Congratulation')->persistent('OK');
         return redirect('/user_area/datasets');
+    }
+    //This function use for show dataset details by data view.
+    public function show(DatasetExplanation $dataset)
+    {
+        return view('dataset.data', ['dataset' => $dataset,
+            'dataRecords' => DatasetValue::where('datasetExplanation_id', $dataset->id)->get(),
+        ]);
     }
 }
