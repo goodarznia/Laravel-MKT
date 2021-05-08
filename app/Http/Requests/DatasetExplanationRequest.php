@@ -13,7 +13,7 @@ class DatasetExplanationRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,10 @@ class DatasetExplanationRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'Title' => 'required|min:10',
+            'Activation_Energy' => 'required|numeric',
+            'dataset_file' => 'required|mimes:json|max:20480',
+            'Comment' => ''
         ];
     }
 }
