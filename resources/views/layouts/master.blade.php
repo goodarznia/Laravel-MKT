@@ -57,6 +57,9 @@
 <!-- Footer -->
 @include('layouts.footer')
 
+<!-- Bootstrap core JavaScript -->
+<script src="{{ asset('js/app.js') }}"></script>
+@include('sweet::alert')
 
 
 </body>
