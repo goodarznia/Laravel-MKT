@@ -8,12 +8,18 @@ use Illuminate\Http\Request;
 
 class DatasetController extends Controller
 {
-    //This function used for show list of Datasets.
+    //This function use for show list of Datasets.
     public function index()
     {
         return view('dataset.list', [
             'datasets' => DatasetExplanation::where('user_id', auth()->user()->id)->get()
         ]);
+    }
+
+    //This function use for show import form list by import view.
+    public function create()
+    {
+        return view('dataset.import');
     }
 
 }
