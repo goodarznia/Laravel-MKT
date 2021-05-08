@@ -22,3 +22,7 @@ Auth::routes();
 Route::get('/auth/google', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'redirect'])->name('auth.google');
 Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'callback']);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::prefix('user_area')->middleware('auth')->group(function () {
+    Route::resource('datasets', 'App\Http\Controllers\User_Area\DatasetController')->except(['update', 'edit', 'destroy']);
+});
