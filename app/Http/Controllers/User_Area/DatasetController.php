@@ -26,6 +26,7 @@ class DatasetController extends Controller
     {
         return view('dataset.import');
     }
+
     //This function use for Store data from import form list
     public function store(DatasetExplanationRequest $request)
     {
@@ -37,34 +38,49 @@ class DatasetController extends Controller
         $file->move(public_path('Uploaded_Files\\'), $newFileName);
         $file_path = public_path('Uploaded_Files\\') . $newFileName;
         $datasets = json_decode(file_get_contents($file_path));
-        // Insert data in Data Explanation Table
-        $datasetExplanation_id = DatasetExplanation::insertGetId([
-            'title' => $Validate_data['Title'],
-            'activation_energy' => $Validate_data['Activation_Energy'],
-            'MKT' => calculation::calcMKT($Validate_data['Activation_Energy'], $datasets),
-            'comment' => $Validate_data['Comment'],
-            'user_id' => auth()->user()->id,
-            'user_ip' => request()->ip(),
-            'created_at' => now()->toDateTimeString(),
-            'updated_at' => now()->toDateTimeString()
-        ]);
-
-        // Insert data in Dataset Value Table
+        //Check for existing valid Keys in json file
+        $status = 1;
         foreach ($datasets as $ds) {
-
-            DatasetValue::create([
-                'datasetExplanation_id' => $datasetExplanation_id,
-                'sample_time' => $ds->Time,
-                'sample_temperature' => $ds->Temperature
+            if (!(array_key_exists('Time', get_object_vars($ds)) and array_key_exists('Temperature', get_object_vars($ds)))) {
+                $status = 0;
+            }
+        }
+        if ($status) {
+            // Insert data in Data Explanation Table
+            $datasetExplanation_id = DatasetExplanation::insertGetId([
+                'title' => $Validate_data['Title'],
+                'activation_energy' => $Validate_data['Activation_Energy'],
+                'MKT' => calculation::calcMKT($Validate_data['Activation_Energy'], $datasets),
+                'comment' => $Validate_data['Comment'],
+                'user_id' => auth()->user()->id,
+                'user_ip' => request()->ip(),
+                'created_at' => now()->toDateTimeString(),
+                'updated_at' => now()->toDateTimeString()
             ]);
 
-        }
-        //Delete stored file for optimizing storage space
-        File::delete($file_path);
+            // Insert data in Dataset Value Table
+            foreach ($datasets as $ds) {
 
-        alert()->success('The dataset stored in Database properly', 'Congratulation')->persistent('OK');
-        return redirect('/user_area/datasets');
+                DatasetValue::create([
+                    'datasetExplanation_id' => $datasetExplanation_id,
+                    'sample_time' => $ds->Time,
+                    'sample_temperature' => $ds->Temperature
+                ]);
+
+            }
+            alert()->success('The dataset stored in Database properly', 'Congratulation')->persistent('OK');
+            //Delete stored file for optimizing storage space
+            File::delete($file_path);
+            return redirect('/user_area/datasets');
+        } else {
+            alert()->error('Essential keys dose not exist in JSON file', 'Error')->persistent('OK');
+            //Delete stored file for optimizing storage space
+            File::delete($file_path);
+            return back()->withErrors(['badFile' => 'Essential keys dose not exist in JSON file']);
+        }
     }
+
+
     //This function use for show dataset details by data view.
     public function show(DatasetExplanation $dataset)
     {
