@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User_Area;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DatasetExplanationRequest;
 use App\Models\DatasetExplanation;
 use Illuminate\Http\Request;
 
@@ -21,5 +22,17 @@ class DatasetController extends Controller
     {
         return view('dataset.import');
     }
+    public function store(DatasetExplanationRequest $request)
+    {
 
+        $Validate_data = $request->validated();
+        $file = $Validate_data['dataset_file'];
+        $fileExtension = $request->file('dataset_file')->getClientOriginalExtension();
+        $newFileName = now()->timestamp . '_' . $file->getClientOriginalName();
+        $file->move(public_path('Uploaded_Files\\'), $newFileName);
+        $file_path = public_path('Uploaded_Files\\') . $newFileName;
+
+
+        return redirect('/user_area/datasets');
+    }
 }
